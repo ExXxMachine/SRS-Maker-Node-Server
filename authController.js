@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const { secret } = require('./config')
 
 const generateAccessToken = (id, roles) => {
-	const payload = { 
+	const payload = {
 		id,
 		roles,
 	}
@@ -20,16 +20,14 @@ class authController {
 				return res
 					.status(400)
 					.json({ success: false, message: 'Ошибка при регистрации', errors })
-			}	
+			}
 			const { username, password } = req.body
 			const candidate = await User.findOne({ username })
 			if (candidate) {
-				return res
-					.status(400)
-					.json({
-						success: false,
-						message: 'Пользователь с таким именем уже существует',
-					})
+				return res.status(400).json({
+					success: false,
+					message: 'Пользователь с таким именем уже существует',
+				})
 			}
 			const hashPassword = bcrypt.hashSync(password, 7)
 			const userRole = await Role.findOne({ value: 'USER' })
@@ -56,11 +54,13 @@ class authController {
 			if (!user) {
 				return res
 					.status(400)
-					.json({ message: `Пользователь ${username} не найден` })
+					.json({ message: `Введен неверный логин или пароль` })
 			}
 			const validationPassword = bcrypt.compareSync(password, user.password)
 			if (!validationPassword) {
-				return res.status(400).json({ message: 'Введен неверный пароль' })
+				return res
+					.status(400)
+					.json({ message: 'Введен неверный логин или пароль' })
 			}
 			const token = generateAccessToken(user._id, user.roles)
 			return res.json({ token })
