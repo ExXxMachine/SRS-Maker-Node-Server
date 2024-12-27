@@ -1,9 +1,9 @@
-const User = require('./models/User')
-const Role = require('./models/Role')
+const User = require('../models/User')
+const Role = require('../models/Role')
 const bcrypt = require('bcryptjs')
 const { validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
-const { secret } = require('./config')
+const { secret } = require('../config')
 
 const generateAccessToken = (id, roles) => {
 	const payload = {
@@ -51,19 +51,27 @@ class authController {
 		try {
 			const { username, password } = req.body
 			const user = await User.findOne({ username })
+
 			if (!user) {
 				return res
 					.status(400)
-					.json({ message: `Введен неверный логин или пароль` })
+					.json({ message: 'Введен неверный логин или пароль' })
 			}
+
 			const validationPassword = bcrypt.compareSync(password, user.password)
 			if (!validationPassword) {
 				return res
 					.status(400)
 					.json({ message: 'Введен неверный логин или пароль' })
 			}
+
 			const token = generateAccessToken(user._id, user.roles)
-			return res.json({ token })
+
+			return res.json({
+				success: true,
+				token,
+				userId: user._id,
+			})
 		} catch (e) {
 			console.log(e)
 			res.status(400).json({ message: 'Login error' })
