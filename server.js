@@ -4,6 +4,7 @@ const cors = require('cors')
 const authRouter = require('./routes/authRouter')
 const Router = require('./Router')
 const projectRoutes = require('./routes/projectRoutes')
+const generate = require('./routes/generation')
 const PORT = process.env.PORT || 5000
 
 const app = express()
@@ -25,5 +26,6 @@ const start = async () => {
 }
 
 app.use('/api/projects', projectRoutes)
+app.use('/api/generate-srs', generate)
 
 start()

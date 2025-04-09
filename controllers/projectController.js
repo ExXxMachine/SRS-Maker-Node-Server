@@ -6,18 +6,25 @@ class ProjectController {
 		try {
 			const errors = validationResult(req)
 			if (!errors.isEmpty()) {
-				return res
-					.status(400)
-					.json({ success: false, message: 'Ошибка валидации', errors })
+				console.error(errors.array()) // Логирование ошибок валидации
+				return res.status(400).json({
+					success: false,
+					message: 'Ошибка валидации',
+					errors,
+				})
 			}
 
 			const { userId, name, data } = req.body
 
-			const project = new Project({
-				userId,
-				name,
-				data,
-			})
+			if (!userId || !name || !Array.isArray(data)) {
+				console.error(`Некорректные данные: ${JSON.stringify(req.body)}`)
+				return res.status(400).json({
+					success: false,
+					message: 'Некорректные данные для создания проекта',
+				})
+			}
+
+			const project = new Project({ userId, name, data })
 
 			await project.save()
 
@@ -27,10 +34,11 @@ class ProjectController {
 				project,
 			})
 		} catch (e) {
-			console.error(e)
-			res
-				.status(500)
-				.json({ success: false, message: 'Ошибка при создании проекта' })
+			console.error(e) // Логирование ошибки сервера
+			res.status(500).json({
+				success: false,
+				message: 'Ошибка при создании проекта',
+			})
 		}
 	}
 
@@ -126,7 +134,7 @@ class ProjectController {
 				project.data = data
 			}
 
-			await project.save() 
+			await project.save()
 
 			return res.json({
 				success: true,
